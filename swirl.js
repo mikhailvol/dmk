@@ -17,6 +17,8 @@ const xOff = 0.00125; //0.03
 const yOff = 0.00125; //0.00125;
 const zOff = 0.0005; //0.0005
 const backgroundColor = '#051328';
+const shadowBlurLevel = 10;
+const shadowBlurColor = '#fff';
 
 let container;
 let canvas;
@@ -34,10 +36,10 @@ let sizes;
 let hues;
 
 function setup() {
-	createCanvas();
+  createCanvas();
   resize();
   initParticles();
-	draw();
+  draw();
 }
 
 function initParticles() {
@@ -46,7 +48,7 @@ function initParticles() {
   particleProps = new Float32Array(particlePropsLength);
 
   let i;
-  
+
   for (i = 0; i < particlePropsLength; i += particlePropCount) {
     initParticle(i);
   }
@@ -77,7 +79,14 @@ function drawParticles() {
 }
 
 function updateParticle(i) {
-  let i2=1+i, i3=2+i, i4=3+i, i5=4+i, i6=5+i, i7=6+i, i8=7+i, i9=8+i;
+  let i2 = 1 + i,
+    i3 = 2 + i,
+    i4 = 3 + i,
+    i5 = 4 + i,
+    i6 = 5 + i,
+    i7 = 6 + i,
+    i8 = 7 + i,
+    i9 = 8 + i;
   let n, x, y, vx, vy, life, ttl, speed, x2, y2, radius, hue;
 
   x = particleProps[i];
@@ -120,46 +129,49 @@ function drawParticle(x, y, x2, y2, life, ttl, radius, hue) {
 }
 
 function checkBounds(x, y) {
-	return(
-		x > canvas.a.width ||
-		x < 0 ||
-		y > canvas.a.height ||
-		y < 0
-	);
+  return (
+    x > canvas.a.width ||
+    x < 0 ||
+    y > canvas.a.height ||
+    y < 0
+  );
 }
 
 function createCanvas() {
   container = document.querySelector('.content--canvas');
-	canvas = {
-		a: document.createElement('canvas'),
-		b: document.createElement('canvas')
-	};
-	canvas.b.style = `
+  canvas = {
+    a: document.createElement('canvas'),
+    b: document.createElement('canvas')
+  };
+  canvas.b.style = `
 		position: fixed;
 		top: 0;
 		left: 0;
 		width: 100%;
 		height: 100%;
 	`;
-	container.appendChild(canvas.b);
-	ctx = {
-		a: canvas.a.getContext('2d'),
-		b: canvas.b.getContext('2d')
+  container.appendChild(canvas.b);
+  ctx = {
+    a: canvas.a.getContext('2d'),
+    b: canvas.b.getContext('2d')
   };
   center = [];
 }
 
 function resize() {
-	const { innerWidth, innerHeight } = window;
-	
-	canvas.a.width = innerWidth;
+  const {
+    innerWidth,
+    innerHeight
+  } = window;
+
+  canvas.a.width = innerWidth;
   canvas.a.height = innerHeight;
 
   ctx.a.drawImage(canvas.b, 0, 0);
 
-	canvas.b.width = innerWidth;
+  canvas.b.width = innerWidth;
   canvas.b.height = innerHeight;
-  
+
   ctx.b.drawImage(canvas.a, 0, 0);
 
   center[0] = 0.5 * canvas.a.width;
@@ -168,13 +180,23 @@ function resize() {
 
 function renderGlow() {
   ctx.b.save();
-  ctx.b.filter = 'blur(8px) brightness(200%)';
+  if (!ctx.b.filter) {
+    ctx.b.shadowBlur = shadowBlurLevel;
+    ctx.b.shadowColor = shadowBlurColor;
+  } else {
+    ctx.b.filter = 'blur(8px) brightness(200%)';
+  }
   ctx.b.globalCompositeOperation = 'lighter';
   ctx.b.drawImage(canvas.a, 0, 0);
   ctx.b.restore();
 
   ctx.b.save();
-  ctx.b.filter = 'blur(4px) brightness(200%)';
+  if (!ctx.b.filter) {
+    ctx.b.shadowBlur = shadowBlurLevel;
+    ctx.b.shadowColor = shadowBlurColor;
+  } else {
+    ctx.b.filter = 'blur(4px) brightness(200%)';
+  }
   ctx.b.globalCompositeOperation = 'lighter';
   ctx.b.drawImage(canvas.a, 0, 0);
   ctx.b.restore();
@@ -199,7 +221,7 @@ function draw() {
   renderGlow();
   renderToScreen();
 
-	window.requestAnimationFrame(draw);
+  window.requestAnimationFrame(draw);
 }
 
 window.addEventListener('load', setup);
